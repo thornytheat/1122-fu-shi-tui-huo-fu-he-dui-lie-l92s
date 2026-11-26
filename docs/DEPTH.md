@@ -12,6 +12,7 @@
 | M4 | 验包评分 | RiskVector处理证据 | `src/returnscope/inspection_score/contracts.py` `src/returnscope/inspection_score/algorithm.py` `src/returnscope/inspection_score/service.py` `src/returnscope/inspection_score/rolling_validation.py` | `tests/test_inspection_score.py` `tests/test_rolling_validation.py` |
 | M5 | 复核配额 | ReviewCandidate处理证据 | `src/returnscope/desk_quota/contracts.py` `src/returnscope/desk_quota/algorithm.py` `src/returnscope/desk_quota/service.py` `src/returnscope/desk_quota/staffing_frontier.py` | `tests/test_desk_quota.py` `tests/test_staffing_frontier.py` |
 | M6 | 退货复盘 | RefundEvidence处理证据 | `src/returnscope/return_replay/contracts.py` `src/returnscope/return_replay/algorithm.py` `src/returnscope/return_replay/service.py` `src/returnscope/return_replay/store_risk_ledger.py` | `tests/test_return_replay.py` `tests/test_store_risk_ledger.py` |
+| M7 | 次班换版选择 | 同额试派与商品组回测证据 | `src/returnscope/shift_selection/algorithm.py` `src/returnscope/shift_selection/service.py` | `tests/test_shift_selection.py` |
 
 ## 边界登记
 
@@ -28,3 +29,6 @@
 | TRAP-44 | 异常包裹超出历史特征轮廓时转验包 | `src/returnscope/inspection_score/algorithm.py` | `tests/test_inspection_score.py::test_unfamiliar_weight_profile_does_not_auto_release` |
 | TRAP-53 | 异常包裹与正常包裹拼批不影响正常样本概率 | `src/returnscope/inspection_score/algorithm.py` | `tests/test_inspection_score.py::test_batch_composition_cannot_change_score` |
 | TRAP-54 | 变更训练轮次使拟合指纹失效 | `src/returnscope/inspection_score/algorithm.py` | `tests/test_inspection_score.py::test_history_and_hyperparameters_change_version` |
+| TRAP-64 | 无已结案可比错件或漏判金额上升的商品组沿用旧版 | `src/returnscope/shift_selection/algorithm.py` | `tests/test_shift_selection.py::test_category_without_comparable_mismatch_keeps_legacy` |
+| TRAP-65 | 混用版本后同额试派使任一商品组多漏时整班回退旧版 | `src/returnscope/shift_selection/algorithm.py` | `tests/test_shift_selection.py::test_mixed_quota_regression_reverts_whole_shift_to_legacy` |
+| TRAP-66 | 已结案错件未取得复核位仍计漏判，未结案标签不进入训练校准 | `src/returnscope/shift_selection/algorithm.py` | `tests/test_shift_selection.py::test_closed_mismatch_without_slot_is_missed_even_if_not_historical_review` |

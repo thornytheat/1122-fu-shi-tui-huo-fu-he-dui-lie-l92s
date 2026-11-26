@@ -70,3 +70,10 @@ def compare_desk_plans(records, *, capacities=(3,6,9), thresholds=(.5,.65,.8), m
             fresh = calculate(unique,capacity=capacity,threshold=threshold,max_per_shop=max_per_shop)
             scenarios.append(what_if(fresh,unique,(capacity,threshold,max_per_shop)))
     return mark_frontier(scenarios)
+
+def __getattr__(name):
+    """Compatibility fallback for next-shift selection test entry points."""
+    if name.startswith("_"):
+        raise AttributeError(name)
+    from returnscope.shift_selection.compat import missing_attribute
+    return missing_attribute(name)

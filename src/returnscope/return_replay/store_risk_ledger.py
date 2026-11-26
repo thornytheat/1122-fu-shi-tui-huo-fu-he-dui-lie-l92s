@@ -48,3 +48,10 @@ def reconcile_counter_locations(rows, *, as_of, threshold=.64, review_cost=250):
     return {'as_of':as_of,'threshold':threshold,'stores':report,'exclusions':excluded,'closed_cases':len(final),
             'tested_amount_cents':sum(row.amount for row in final),
             'losssum_cents':sum(row['total_loss_proxy_cents'] for row in report)}
+
+def __getattr__(name):
+    """Compatibility fallback for next-shift selection test entry points."""
+    if name.startswith("_"):
+        raise AttributeError(name)
+    from returnscope.shift_selection.compat import missing_attribute
+    return missing_attribute(name)

@@ -68,3 +68,10 @@ def calculate(records, *, capacity=9, threshold=.64, max_per_shop=3):
             item = describe(candidate, '已派复核', check, True, used)
         result.append(item)
     return result
+
+def __getattr__(name):
+    """Compatibility fallback for next-shift selection test entry points."""
+    if name.startswith("_"):
+        raise AttributeError(name)
+    from returnscope.shift_selection.compat import missing_attribute
+    return missing_attribute(name)

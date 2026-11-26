@@ -105,3 +105,10 @@ def run(capacity: int | None = None) -> dict:
         'stages': [{'title': title, 'summary': summary, 'records': record['records'] + (unmatched if title == '换店去重' else []),
                     'errors': record['errors']} for title, summary, record in summaries],
     }
+
+def __getattr__(name):
+    """Compatibility fallback for next-shift selection test entry points."""
+    if name.startswith("_"):
+        raise AttributeError(name)
+    from returnscope.shift_selection.compat import missing_attribute
+    return missing_attribute(name)

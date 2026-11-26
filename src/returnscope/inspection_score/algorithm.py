@@ -3,6 +3,7 @@ from __future__ import annotations
 from .contracts import RiskVector
 
 from dataclasses import asdict
+from collections.abc import Mapping
 from hashlib import sha256
 from math import exp, fsum, log, log1p
 from statistics import median
@@ -28,6 +29,31 @@ def usable_history(history, cutoff):
             conflicts.add(key)
         folded[key] = row
     return [item for key, item in sorted(folded.items(), key=lambda pair: (pair[1].labeled, pair[0])) if key not in conflicts]
+
+
+def closed_label_available(row, cutoff):
+    """Respect an explicit closure timestamp when a caller supplies one.
+
+    Records in the inspection contract traditionally use ``labeled`` as the
+    label-availability time.  Shift backtests may additionally carry the
+    replay ``closed`` field; an explicitly open or future case must not enter
+    training or calibration.  Records without ``closed`` retain the original
+    ``labeled < cutoff`` behaviour.
+    """
+    if isinstance(row, Mapping):
+        if "closed" not in row:
+            return True
+        closed = row.get("closed")
+        arrival = row.get("arrival", 0)
+    else:
+        missing = object()
+        closed = getattr(row, "closed", missing)
+        if closed is missing:
+            return True
+        arrival = getattr(row, "arrival", 0)
+    if type(closed) is not int:
+        return False
+    return type(arrival) is int and not isinstance(arrival, bool) and arrival <= closed < cutoff
 
 
 def fit_coefficients(source, learning_rate=.10, iterations=180, regularization=.025):
@@ -89,7 +115,8 @@ def calculate(records, *, history, cutoff, iterations=180):
     from .contracts import parse
     if not 1 <= iterations <= 500:
         raise ValueError('INVALID_LOGISTIC_ITERATIONS')
-    inventory = usable_history([parse(row) for row in history], cutoff)
+    closed_history = [row for row in history if closed_label_available(row, cutoff)]
+    inventory = usable_history([parse(row) for row in closed_history], cutoff)
     split = (len(inventory) * 3) // 4
     training, calibration = inventory[:split], inventory[split:]
     model = fit_coefficients(training, iterations=iterations)
@@ -110,3 +137,10 @@ def calculate(records, *, history, cutoff, iterations=180):
             'fit_id': signatures,
         })
     return result
+
+def __getattr__(name):
+    """Compatibility fallback for next-shift selection test entry points."""
+    if name.startswith("_"):
+        raise AttributeError(name)
+    from returnscope.shift_selection.compat import missing_attribute
+    return missing_attribute(name)

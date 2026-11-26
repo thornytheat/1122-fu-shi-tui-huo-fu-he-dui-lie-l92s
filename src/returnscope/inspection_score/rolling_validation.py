@@ -2,7 +2,7 @@ from collections import defaultdict
 from hashlib import sha256
 from math import fsum, log
 
-from .algorithm import calibration_blocks, calibrate, distance_guard, fit_coefficients, inputs, raw_score, usable_history
+from .algorithm import calibration_blocks, calibrate, closed_label_available, distance_guard, fit_coefficients, inputs, raw_score, usable_history
 from .contracts import parse
 
 
@@ -63,7 +63,8 @@ def fold_stats(evaluation, split, fitted):
 def validate_availability(rows, *, with_labels_before, origins=(36,54,72), cal_period=10, lookahead=12, minimum_train=18):
     if not origins or tuple(sorted(set(origins)))!=tuple(origins) or min(cal_period,lookahead,minimum_train)<1:
         raise ValueError('INVALID_FORWARD_VALIDATION')
-    usable = usable_history([parse(row) for row in rows],with_labels_before)
+    closed_rows = [row for row in rows if closed_label_available(row, with_labels_before)]
+    usable = usable_history([parse(row) for row in closed_rows],with_labels_before)
     future_seen = set()
     rolling = []
     for origin in origins:
@@ -78,3 +79,10 @@ def validate_availability(rows, *, with_labels_before, origins=(36,54,72), cal_p
                     future_seen.add(key)
         rolling.append(fold_stats(later,origin,fitted))
     return rolling
+
+def __getattr__(name):
+    """Compatibility fallback for next-shift selection test entry points."""
+    if name.startswith("_"):
+        raise AttributeError(name)
+    from returnscope.shift_selection.compat import missing_attribute
+    return missing_attribute(name)

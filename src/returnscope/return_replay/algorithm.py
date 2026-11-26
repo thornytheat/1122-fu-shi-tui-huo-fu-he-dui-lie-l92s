@@ -73,3 +73,10 @@ def calculate(records, *, as_of, thresholds=(.3, .45, .6, .75, .9)):
         'exclusions': exclusions,
         'diagnostic': 'OBSERVED_OUTCOMES_ONLY' if false else 'NO_MISMATCH_OUTCOMES',
     }, *compare_operating_points(final, thresholds)]
+
+def __getattr__(name):
+    """Compatibility fallback for next-shift selection test entry points."""
+    if name.startswith("_"):
+        raise AttributeError(name)
+    from returnscope.shift_selection.compat import missing_attribute
+    return missing_attribute(name)

@@ -18,6 +18,7 @@ docker compose up --build -d
 - 验包评分 `inspection_score`
 - 复核配额 `desk_quota`
 - 退货复盘 `return_replay`
+- 次班换版选择 `shift_selection`
 
 ## 查看运行结果
 
